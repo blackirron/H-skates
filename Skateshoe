@@ -1,0 +1,31 @@
+Dim swApp As Object
+Dim Part As Object
+Dim boolstatus As Boolean
+
+Sub main()
+    Set swApp = Application.SldWorks
+    Set Part = swApp.ActiveDoc
+
+    ' Check if a part is open
+    If Part Is Nothing Then
+        MsgBox "Please open a New Part first."
+        Exit Sub
+    End If
+
+    ' Select the Top Plane
+    boolstatus = Part.Extension.SelectByID2("Top Plane", "PLANE", 0, 0, 0, False, 0, Nothing, 0)
+    Part.SketchManager.InsertSketch True
+
+    ' Draw the outer profile (Simplified as a slot/pill shape)
+    ' Parameters: CenterX, CenterY, CenterZ, Point1X, Point1Y, Point1Z, Point2X, Point2Y, Point2Z
+    ' Units are in meters (0.25m = 250mm)
+    Part.SketchManager.CreateLine -0.05, 0.1, 0, -0.05, -0.08, 0
+    Part.SketchManager.CreateTangentArc -0.05, 0.1, 0, 0.05, 0.1, 0, 1
+    Part.SketchManager.CreateLine 0.05, 0.1, 0, 0.05, -0.08, 0
+    Part.SketchManager.CreateTangentArc 0.05, -0.08, 0, -0.05, -0.08, 0, 1
+
+    ' Extrude the sole (20mm thickness)
+    Part.FeatureManager.FeatureExtrusion2 True, False, False, 0, 0, 0.02, 0.01, False, False, False, False, 0, 0, False, False, False, False, True, True, True, 0, 0, False
+    
+    Part.ClearSelection2 True
+End Sub
